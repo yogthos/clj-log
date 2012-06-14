@@ -1,119 +1,114 @@
 clj-log
 =======
 
-structural logging for Clojure using log4j, outputs logs using Clojure data structures
+Structural logger for Clojure using [clojure.tools.logging](http://clojure.github.com/tools.logging/), which outputs logs using Clojure data structures.
 
 ## Installation
 
 Leiningen
 
 ```clojure
-[clj-log "0.0.1"]
+[clj-log "0.2"]
 ```
 
 ## Usage
 
-A logger must be initialized before use, this is done with `init-logger`, after that `log` function can be used to do logging.
+To enable logging you must first setup your logging properties, eg:
+
+log4j.logger.clj-log.test.core=DEBUG, rollingFile 
+log4j.appender.rollingFile=org.apache.log4j.RollingFileAppender
+log4j.appender.rollingFile.File=test.log
+log4j.appender.rollingFile.MaxFileSize=100KB
+log4j.appender.rollingFile.MaxBackupIndex=2
+log4j.appender.rollingFile.layout = org.apache.log4j.PatternLayout
+log4j.appender.rollingFile.layout.ConversionPattern=%m%n
+
+
+note: make sure that the logging pattern does not append anything to the log as it will produce garbage, see clojure.tools.logging for more documentation
+
+Accepted logging levels are:
+
+```Clojure
+:trace, :debug, :info, :warn, :error, :fatal
+```
+
+`log` accepts level, message, and an optional Throwable as parameters
+
+### Examples
 
 ```clojure
-(init-logger :test-logger :info [{:id :file-appender :type :file :filename "test.log" :append? false}])
-(log :test-logger :info "foo")
+
+(log :info "foo")
 
 ```
 
-output
+output:
 
 ```clojure
-{:logger :test-logger,
- :time #inst "2012-06-14T02:05:40.487-00:00",
+{:ns "clj-log.test.core",
+ :time #inst "2012-06-14T21:46:12.980-00:00",
  :message "foo",
- :level :trace}
+ :level :info}
 ```
 
 ```clojure
 (try 
   (throw (new Exception "foobar"))
   (catch Exception ex
-    (log :test-logger :error "an error has occured" ex)))
+    (log :error "an error has occured" ex)))
 ```
+truncated output:
 
 ```clojure
 {:exception
  {:class java.lang.Exception,
-  :cause nil,
-  :message "foobar",
-  :localized "foobar",
+  :cause
+  {:exception
+   {:class java.lang.Exception,
+    :cause nil,
+    :message "foobar",
+    :localized "foobar",
+    :stack-trace
+    [{:class "clj_log.test.core$eval964",
+      :file "NO_SOURCE_FILE",
+      :line 1,
+      :method "invoke"}
+     {:class "clojure.lang.Compiler",
+      :file "Compiler.java",
+      :line 6511,
+      :method "eval"}          
+     {:class "java.util.concurrent.ThreadPoolExecutor$Worker",
+      :file "ThreadPoolExecutor.java",
+      :line 603,
+      :method "run"}
+     {:class "java.lang.Thread",
+      :file "Thread.java",
+      :line 722,
+      :method "run"}]}},
+  :message "caused by: ",
+  :localized "caused by: ",
   :stack-trace
-  [{:class "clj_log.test.core$eval1265",
+  [{:class "clj_log.test.core$eval964",
     :file "NO_SOURCE_FILE",
-    :line 2,
+    :line 4,
     :method "invoke"}
    {:class "clojure.lang.Compiler",
     :file "Compiler.java",
     :line 6511,
-    :method "eval"}
-   {:class "clojure.lang.Compiler",
-    :file "Compiler.java",
-    :line 6477,
-    :method "eval"}
-   {:class "clojure.core$eval",
-    :file "core.clj",
-    :line 2797,
-    :method "invoke"}
-   {:class "clojure.main$repl$read_eval_print__6405",
-    :file "main.clj",
-    :line 245,
-    :method "invoke"}
-   {:class "clojure.main$repl$fn__6410",
-    :file "main.clj",
-    :line 266,
-    :method "invoke"}]},
- :logger :test-logger,
- :time #inst "2012-06-14T02:56:35.496-00:00",
+    :method "eval"}      
+   {:class "java.util.concurrent.ThreadPoolExecutor$Worker",
+    :file "ThreadPoolExecutor.java",
+    :line 603,
+    :method "run"}
+   {:class "java.lang.Thread",
+    :file "Thread.java",
+    :line 722,
+    :method "run"}]},
+ :ns "clj-log.test.core",
+ :time #inst "2012-06-14T21:51:56.871-00:00",
  :message "an error has occured",
  :level :error}
 ```
-
-When initializing a logger you must supply the id of the logger, it's log level and a vector of appenders associated with the logger. 
-
-Following log levels are available:
-
-* :debug
-* :info
-* :warn
-* :error
-* :trace
-* :fatal
-
-The following appenders are available:
-
-### Console appender
-
-* :type :console-appender
-
-### File appender
-
-additional properties:
-
-* :type :file
-* :filename string
-* :append? boolean
-* :buffered? boolean
-* :buf-size int
-
-### Rolling file appender
-
-additional properties:
-
-* :max-size long or a string formed as integer followed by suffix "KB", "MB" or "GB", eg: 10KB will be interpreted as 10240
-* :max-backups number indicating maximum number of backups to keep
-
-### Daily rolling file appender
-
-additional properties:
-
-* :date-pattern string [format detials](http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/DailyRollingFileAppender.html)
-
 
 ## Log viewing
 

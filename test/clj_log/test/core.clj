@@ -2,14 +2,34 @@
   (:use [clj-log.core])
   (:use [clojure.test]))
 
+(def log-file "test.log")
+
 (deftest test-log
-  (clojure.java.io/delete-file "test.log")
-  (init-logger :test-logger :info [{:id :file-appender :type :file :filename "test.log" :append? false}])
-  (log :test-logger :info "foo")
-  (let [{:keys [logger time message level]} (first (read-log "test.log"))]
+(.write (clojure.java.io/writer log-file) "")  
+  (log :info "foo")
+  (let [{:keys [ns time message level]} (first (read-log log-file))]
     (is (and (instance? java.util.Date time)
-             (= :test-logger logger)
+             (= "clj-log.test.core" ns)
              (= "foo" message)
              (= :info level)))))
+
+
+(deftest ex-log
+  (.write (clojure.java.io/writer log-file) "")
+  (try 
+    (throw (new Exception "foobar"))
+    (catch Exception ex
+      (log :error "an error has occured" (new Exception "caused by: " ex))))
+  
+  (let [{:keys [exception]} (first (read-log log-file))]
+    (= "foobar"
+       (->> exception :cause :message))))
+
+
+(deftest log-reading
+  (.write (clojure.java.io/writer log-file) "")
+  (log :info "foo")
+  (log :error "error" (new Exception "oops"))
+  (= 1 (count (read-log log-file (fn [x] (= :error (:level x)))))))
 
 
