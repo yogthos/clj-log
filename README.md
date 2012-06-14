@@ -21,6 +21,59 @@ A logger must be initialized before use, this is done with `init-logger`, after 
 
 ```
 
+output
+
+```clojure
+{:logger :test-logger,
+ :time #inst "2012-06-14T02:05:40.487-00:00",
+ :message "foo",
+ :level :trace}
+```
+
+```clojure
+(try 
+  (throw (new Exception "foobar"))
+  (catch Exception ex
+    (log :test-logger :error "an error has occured" ex)))
+```
+
+```clojure
+{:exception
+ {:class java.lang.Exception,
+  :cause nil,
+  :message "foobar",
+  :localized "foobar",
+  :stack-trace
+  [{:class "clj_log.test.core$eval1265",
+    :file "NO_SOURCE_FILE",
+    :line 2,
+    :method "invoke"}
+   {:class "clojure.lang.Compiler",
+    :file "Compiler.java",
+    :line 6511,
+    :method "eval"}
+   {:class "clojure.lang.Compiler",
+    :file "Compiler.java",
+    :line 6477,
+    :method "eval"}
+   {:class "clojure.core$eval",
+    :file "core.clj",
+    :line 2797,
+    :method "invoke"}
+   {:class "clojure.main$repl$read_eval_print__6405",
+    :file "main.clj",
+    :line 245,
+    :method "invoke"}
+   {:class "clojure.main$repl$fn__6410",
+    :file "main.clj",
+    :line 266,
+    :method "invoke"}]},
+ :logger :test-logger,
+ :time #inst "2012-06-14T02:56:35.496-00:00",
+ :message "an error has occured",
+ :level :error}
+```
+
 When initializing a logger you must supply the id of the logger, it's log level and a vector of appenders associated with the logger. 
 
 Following log levels are available:
