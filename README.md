@@ -15,13 +15,13 @@ Leiningen
 
 To enable logging you must first setup your logging properties, eg:
 
-log4j.logger.clj-log.test.core=DEBUG, rollingFile 
-log4j.appender.rollingFile=org.apache.log4j.RollingFileAppender
-log4j.appender.rollingFile.File=test.log
-log4j.appender.rollingFile.MaxFileSize=100KB
-log4j.appender.rollingFile.MaxBackupIndex=2
-log4j.appender.rollingFile.layout = org.apache.log4j.PatternLayout
-log4j.appender.rollingFile.layout.ConversionPattern=%m%n
+    log4j.logger.clj-log.test.core=DEBUG, rollingFile 
+    log4j.appender.rollingFile=org.apache.log4j.RollingFileAppender
+    log4j.appender.rollingFile.File=test.log
+    log4j.appender.rollingFile.MaxFileSize=100KB
+    log4j.appender.rollingFile.MaxBackupIndex=2
+    log4j.appender.rollingFile.layout = org.apache.log4j.PatternLayout
+    log4j.appender.rollingFile.layout.ConversionPattern=%m%n
 
 
 note: make sure that the logging pattern does not append anything to the log as it will produce garbage, see clojure.tools.logging for more documentation
