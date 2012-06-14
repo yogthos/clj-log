@@ -12,3 +12,4 @@
              (= "foo" message)
              (= :info level)))))
 
+

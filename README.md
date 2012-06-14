@@ -1,7 +1,7 @@
 clj-log
 =======
 
-## structural logging for Clojure
+structural logging for Clojure using log4j, outputs logs using Clojure data structures
 
 ## Installation
 
@@ -62,5 +62,13 @@ additional properties:
 * :date-pattern string [format detials](http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/DailyRollingFileAppender.html)
 
 
+## Log viewing
+
+`read-log` reads a log file into memory, accepts an optional filter function
+
+```clojure
+(read-log "test.log")
+(read-log "test.log" (fn [item] (= #inst "2012-06-14T02:25:33.960-00:00" (:time item))))
+``` 
 
 

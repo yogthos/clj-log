@@ -96,7 +96,7 @@
       :fatal (.fatal logger log-message))))
 
 
-(defn read-log [file-name]
+(defn read-log [file-name & [log-filter]]
   (with-open [r (->> file-name
                   (new FileInputStream)
                   (new InputStreamReader)
@@ -104,5 +104,6 @@
     (binding [*read-eval* false]
       (loop [logs []]
         (if-let [item (read r nil nil)]
-          (recur (conj logs item))
+          (recur (if (or (nil? log-filter ) (log-filter item)) 
+                   (conj logs item) logs))
           logs)))))
