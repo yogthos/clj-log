@@ -51,6 +51,7 @@
     (.removeAllAppenders logger)
     
     (doseq [{:keys [id type filename append? buffered? buf-size date-pattern]} appenders]
+      (when (nil? id) (throw (new Exception "id is required for an appender")))
       (.removeAppender logger (name id))
       (.addAppender logger
         (doto
