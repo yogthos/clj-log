@@ -3,7 +3,7 @@
   (:import
     java.util.Date
     java.io.StringWriter
-    [org.apache.log4j Level Logger ConsoleAppender PatternLayout DailyRollingFileAppender FileAppender]
+    [org.apache.log4j Level Logger ConsoleAppender PatternLayout DailyRollingFileAppender FileAppender RollingFileAppender]
     [java.io File PushbackReader InputStreamReader FileInputStream]))
 
 
@@ -35,6 +35,23 @@
       :localized (.getLocalizedMessage ex)
       :stack-trace (stack-trace ex)}}))
 
+(defn- make-file-appender [layout params]
+  (let [{:keys [id type filename append? buffered? buf-size date-pattern max-size max-backups]} params
+        appender (condp = type
+                   :file (new FileAppender layout filename)
+                   :rolling-file (new RollingFileAppender layout filename)
+                   :daily-rolling-file (new DailyRollingFileAppender layout filename date-pattern))]
+    (when max-backups (.setMaxBackupIndex appender (int max-backups)))
+    (when (= false append?) (.setAppend appender false))
+    (when buffered? (.setBufferedIO appender true))
+    (when buf-size (.setBufferSize appender (int buf-size)))
+    (if (or (= :rolling-file type) (= :daily-rolling-file type))
+      (cond 
+      (string? max-size) (.setMaxFileSize appender max-size) 
+      (number? max-size) (.setMaximumFileSize appender (long max-size))))
+    (when (and (= :daily-rolling-file type) date-pattern)
+      (.setDatePattern appender date-pattern))        
+    appender))
 
 (defn init-logger [logger-name level appenders]
   (let [layout (new PatternLayout PatternLayout/DEFAULT_CONVERSION_PATTERN )
@@ -50,24 +67,15 @@
         :warn  Level/WARN))
     (.removeAllAppenders logger)
     
-    (doseq [{:keys [id type filename append? buffered? buf-size date-pattern]} appenders]
-      (when (nil? id) (throw (new Exception "id is required for an appender")))
-      (.removeAppender logger (name id))
+    (doseq [appender appenders]
+      (when (nil? (:id appender)) (throw (new Exception "id is required for an appender")))
+      (.removeAppender logger (name (:id appender)))
       (.addAppender logger
         (doto
-          (cond
-            (= :console type)
-            (new ConsoleAppender layout ConsoleAppender/SYSTEM_OUT)
-            
-            (or (= :file type) (= :rolling-file type))
-            (let [appender (if (= :file type)
-                             (new FileAppender layout filename)
-                             (new DailyRollingFileAppender layout filename date-pattern))]
-              (when append? (.setAppend appender true))
-              (when buffered? (.setBufferedIO appender true))
-              (when buf-size (.setBufferSize appender (int buf-size)))
-              appender))
-          (.setName (name id)))))))
+          (if (= :console (:type appender))                  
+            (new ConsoleAppender layout ConsoleAppender/SYSTEM_OUT)            
+            (make-file-appender layout appender))
+          (.setName (name (:id appender))))))))
 
 
 (defn log [logger-name level message & [ex]]
