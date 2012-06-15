@@ -14,6 +14,14 @@
              (= :info level)))))
 
 
+(deftest test-flog
+  (.write (clojure.java.io/writer log-file) "")
+  (logf :info "%s accidentally the whole %s" "I" ".jar file")
+  (let [{:keys [message pattern]} (first (read-log log-file))]
+    (is (and (= "I accidentally the whole .jar file" message)
+             (= "%s accidentally the whole %s" pattern)))))
+
+
 (deftest ex-log
   (.write (clojure.java.io/writer log-file) "")
   (try 

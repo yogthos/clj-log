@@ -22,6 +22,15 @@
       :localized (.getLocalizedMessage ex)
       :stack-trace (stack-trace ex)}}))
 
+(defn- make-message [message level & [pattern]]
+  (let [msg {:ns (name (ns-name *ns*))
+             :time (new Date)
+             :message message
+             :level level}]
+    (if pattern (assoc msg :pattern pattern) msg)))
+
+(defn- log-message [level message]
+  (logging/log *ns* level nil (with-out-str (clojure.pprint/pprint message))))
 
 (defn log
   "level can be :trace, :debug, :info, :warn, :error, :fatal
@@ -45,13 +54,22 @@
                      :method}}"
   [level message & [ex]]
   (println (ns-name *ns*))
-  (let [message-info {:ns (name (ns-name *ns*))
-                      :time (new Date)
-                      :message message
-                      :level level}
-        exception-info (ex-log ex)
-        log-message (with-out-str (clojure.pprint/pprint (merge message-info exception-info)))]
-    (logging/log *ns* level nil log-message)))
+  (let [message-info   (make-message message level)         
+        exception-info (ex-log ex)]
+    (log-message level (merge message-info exception-info))))
+
+
+(defn logf [level pattern & args]
+  (let [[format-args ex] 
+        (if (instance? Throwable (last args)) [(butlast args) (last args)] [args nil])]
+    (merge 
+                     (make-message (apply (partial format pattern) args) level pattern)
+                     (ex-log ex))
+    (log-message
+      level
+      (merge 
+        (make-message (apply (partial format pattern) args) level pattern)
+        (ex-log ex)))))
 
 
 (defn read-log
@@ -67,6 +85,4 @@
           (recur (if (or (nil? log-filter ) (log-filter item))
                    (conj logs item) logs))
           logs)))))
-
-
 

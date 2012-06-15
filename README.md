@@ -34,20 +34,30 @@ Accepted logging levels are:
 
 `log` accepts level, message, and an optional Throwable as parameters
 
+'logf` accepts level, pattern, args, and an optional Throwable as parameters 
 ### Examples
 
 ```clojure
 
 (log :info "foo")
 
-```
+;output
 
-output:
-
-```clojure
 {:ns "clj-log.test.core",
  :time #inst "2012-06-14T21:46:12.980-00:00",
  :message "foo",
+ :level :info}
+```
+
+```clojure
+(logf :info "%s accidentally the whole %s" "I" ".jar file")
+
+;output
+
+{:pattern "%s accidentally the whole %s",
+ :ns "clj-log.test.core",
+ :time #inst "2012-06-15T02:25:42.070-00:00",
+ :message "I accidentally the whole .jar file",
  :level :info}
 ```
 
@@ -56,10 +66,9 @@ output:
   (throw (new Exception "foobar"))
   (catch Exception ex
     (log :error "an error has occured" ex)))
-```
-truncated output:
 
-```clojure
+;truncated output
+
 {:exception
  {:class java.lang.Exception,
   :cause
