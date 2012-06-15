@@ -40,4 +40,3 @@
   (log :error "error" (new Exception "oops"))
   (= 1 (count (read-log log-file (fn [x] (= :error (:level x)))))))
 
-

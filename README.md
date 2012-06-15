@@ -47,6 +47,18 @@ Accepted logging levels are:
  :time #inst "2012-06-14T21:46:12.980-00:00",
  :message "foo",
  :level :info}
+ 
+ 
+ ;message can be any clojure data structure
+ (log :warn {:foo "bar"})
+ 
+ ;output 
+ 
+ {:ns "clj-log.test.core",
+ :time #inst "2012-06-15T02:55:17.392-00:00",
+ :message {:foo "bar"},
+ :level :warn}
+ 
 ```
 
 ```clojure
