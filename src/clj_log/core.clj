@@ -75,6 +75,8 @@
 (defn read-log
   "accepts file name as input and a filter function which each item in the log will be checked against"
   [file-name & [log-filter]]
+  (when (not (.exists (new java.io.File file-name)))
+    (throw (new Exception (str "log " file-name " is not available!"))))
   (with-open [r (->> file-name
                   (new FileInputStream)
                   (new InputStreamReader)

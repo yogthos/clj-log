@@ -14,7 +14,7 @@
              (= :info level)))))
 
 
-(deftest test-flog
+(deftest test-logf
   (.write (clojure.java.io/writer log-file) "")
   (logf :info "%s accidentally the whole %s" "I" ".jar file")
   (let [{:keys [message pattern]} (first (read-log log-file))]
@@ -39,4 +39,5 @@
   (log :info "foo")
   (log :error "error" (new Exception "oops"))
   (= 1 (count (read-log log-file (fn [x] (= :error (:level x)))))))
+
 
