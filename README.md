@@ -133,11 +133,13 @@ Accepted logging levels are:
 
 ## Log viewing
 
-`read-log` reads a log file into memory, accepts an optional filter function
+`read-log` reads a log file into memory, accepts an optional filter function, and max number of logs to retain
 
 ```clojure
 (read-log "test.log")
+(read-log "test.log" 5)
 (read-log "test.log" (fn [item] (= #inst "2012-06-14T02:25:33.960-00:00" (:time item))))
+(read-log "test.log" (fn [item] (= #inst "2012-06-14T02:25:33.960-00:00" (:time item))) 15)
 ``` 
 
 
