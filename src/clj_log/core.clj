@@ -73,8 +73,8 @@
 
 
 (defn read-log
-  "accepts file name as input and a filter function which each item in the log will be checked against"
-  [file-name & [log-filter]]
+  "accepts file name as input, a filter function which each item in the log will be checked against and maximum number of logs to retain"
+  [file-name & [log-filter max-size]]
   (when (not (.exists (new java.io.File file-name)))
     (throw (new Exception (str "log " file-name " is not available!"))))
   (with-open [r (->> file-name
@@ -83,8 +83,9 @@
                   (new PushbackReader))]
     (binding [*read-eval* false]
       (loop [logs []]
-        (if-let [item (read r nil nil)]
-          (recur (if (or (nil? log-filter ) (log-filter item))
-                   (conj logs item) logs))
-          logs)))))
+        (let [item (read r nil nil)] 
+          (if (and (if max-size (<= (count logs) max-size) true) item)
+            (recur (if (or (nil? log-filter ) (log-filter item))
+                     (conj logs item) logs))
+            logs))))))
 
