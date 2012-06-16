@@ -7,9 +7,10 @@
 (deftest test-log
 (.write (clojure.java.io/writer log-file) "")  
   (log :info "foo")
-  (let [{:keys [ns time message level]} (first (read-log log-file))]
+  (let [log-item (first (read-log log-file))
+        {:keys [ns time message level]} log-item]    
     (is (and (instance? java.util.Date time)
-             (= "clj-log.test.core" ns)
+             (not-empty  ns)
              (= "foo" message)
              (= :info level)))))
 
@@ -17,7 +18,8 @@
 (deftest test-logf
   (.write (clojure.java.io/writer log-file) "")
   (logf :info "%s accidentally the whole %s" "I" ".jar file")
-  (let [{:keys [message pattern]} (first (read-log log-file))]
+  (let [log-item (first (read-log log-file))
+        {:keys [message pattern]} log-item]    
     (is (and (= "I accidentally the whole .jar file" message)
              (= "%s accidentally the whole %s" pattern)))))
 
