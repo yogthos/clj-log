@@ -8,7 +8,7 @@ Structural logger for Clojure using [clojure.tools.logging](http://clojure.githu
 Leiningen
 
 ```clojure
-[clj-log "0.2"]
+[clj-log "0.3"]
 ```
 
 ## Usage
