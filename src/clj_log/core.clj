@@ -84,10 +84,15 @@
                   (new InputStreamReader)
                   (new PushbackReader))]
     (binding [*read-eval* false]
-      (loop [logs []]
+      (loop [logs '()]
         (let [item (read r nil nil)] 
-          (if (and (or (nil? max-size) (< (count logs) max-size)) item)
+          (if item
+            ;;if log reached max size, then drop items before adding new items
+            ;;return tail end of the log up to max size
             (recur (if (or (nil? log-filter ) (log-filter item))
-                     (conj logs item) logs))
+                     (conj 
+                       (if (or (nil? max-size) (< (count logs) max-size))
+                         logs (butlast logs)) item) 
+                     logs))
             logs)))))))
 

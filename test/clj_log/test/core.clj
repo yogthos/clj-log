@@ -40,6 +40,13 @@
   (.write (clojure.java.io/writer log-file) "")
   (log :info "foo")
   (log :error "error" (new Exception "oops"))
-  (= 1 (count (read-log log-file (fn [x] (= :error (:level x)))))))
+  (log :info "bar")
+  (log :warn "baz")  
+  (log :info "last item")
+  (= 1 (count (read-log log-file #(= :error (:level %)))))
+  (= ["last item" "baz"] (map :message (read-log log-file 2)))
+  (= ["error" "foo" "last item"] (map :message (read-log log-file #(not= "baz" (:message %)) 3))))
+
+
 
 

@@ -8,7 +8,7 @@ Structural logger for Clojure using [clojure.tools.logging](http://clojure.githu
 Leiningen
 
 ```clojure
-[clj-log "0.3"]
+[clj-log "0.4"]
 ```
 
 ## Usage
@@ -139,13 +139,13 @@ Accepted logging levels are:
 ;read all logs in the file
 (read-log "test.log")
 
-;read first 5 logs
+;read last 5 logs
 (read-log "test.log" 5)
 
 ;read logs with the matching timestamp
 (read-log "test.log" (fn [item] (= #inst "2012-06-14T02:25:33.960-00:00" (:time item))))
 
-;read up to 15 logs with level :warn
+;read last 15 logs with level :warn
 (read-log "test.log" (fn [item] (= :warn (:level item))) 15)
 ``` 
 
