@@ -29,6 +29,9 @@ note: make sure that the logging pattern does not append anything to the log as 
 Accepted logging levels are:
 
 ```Clojure
+(ns example
+ (:use clj-log.core))
+
 :trace, :debug, :info, :warn, :error, :fatal
 ```
 

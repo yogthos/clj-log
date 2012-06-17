@@ -1,6 +1,5 @@
 (ns clj-log.test.core
-  (:use [clj-log.core])
-  (:use [clojure.test]))
+  (:use clojure.test clj-log.core))
 
 (def log-file "test.log")
 
