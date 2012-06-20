@@ -30,7 +30,10 @@
     (if pattern (assoc msg :pattern pattern) msg)))
 
 (defn- log-message [level message]
-  (logging/log *ns* level nil (with-out-str (clojure.pprint/pprint message))))
+  (logging/log *ns* level nil 
+               (let [wrt (new java.io.StringWriter)]
+                 (clojure.pprint/pprint message wrt)
+                 (.toString wrt))))
 
 (defn log
   "level can be :trace, :debug, :info, :warn, :error, :fatal
@@ -52,8 +55,7 @@
                      :file file name
                      :line number
                      :method}}"
-  [level message & [ex]]
-  (println (ns-name *ns*))
+  [level message & [ex]]  
   (let [message-info   (make-message message level)         
         exception-info (ex-log ex)]
     (log-message level (merge message-info exception-info))))
