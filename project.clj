@@ -1,4 +1,4 @@
-(defproject clj-log "0.4.1-SNAPSHOT"
+(defproject clj-log "0.4.2-SNAPSHOT"
   :description "structured logger"
   :dependencies [[org.clojure/clojure "1.4.0"]
                  [org.clojure/tools.logging "0.2.3"]

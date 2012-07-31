@@ -87,7 +87,7 @@
                   (new PushbackReader))]
     (binding [*read-eval* false]
       (loop [logs '()]
-        (let [item (read r nil nil)] 
+        (let [item (try (read r nil nil) (catch Exception ex {:parse-error (.getMessage ex)}))] 
           (if item
             ;;if log reached max size, then drop items before adding new items
             ;;return tail end of the log up to max size
