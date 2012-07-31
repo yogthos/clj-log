@@ -1,7 +1,7 @@
 clj-log
 =======
 
-Structural logger for Clojure using [clojure.tools.logging](http://clojure.github.com/tools.logging/), which outputs logs using Clojure data structures.
+S-expression logger for Clojure using [clojure.tools.logging](http://clojure.github.com/tools.logging/), which outputs logs using Clojure data structures.
 
 ## Installation
 
