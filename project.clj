@@ -1,4 +1,4 @@
-(defproject clj-log "0.4.3"
+(defproject clj-log "0.4.4"
   :description "structured logger"
   :url "https://github.com/yogthos/clj-log"
   :dependencies [[org.clojure/clojure "1.4.0"]

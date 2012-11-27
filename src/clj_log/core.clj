@@ -38,7 +38,7 @@
 (defn gen-log [ns level message ex]
   (let [message-info   (make-message ns message level)         
          exception-info (ex-log ex)]
-     (log-message ns level (merge message-info exception-info))))
+    (log-message ns level (merge message-info exception-info))))
 
 (defmacro log
   "level can be :trace, :debug, :info, :warn, :error, :fatal
@@ -64,12 +64,9 @@
   `(gen-log *ns* ~level ~message ~more))
 
 
-(defn gen-logf [ns level pattern args]
+(defn gen-logf [ns level pattern & args]
   (let [[format-args ex] 
-        (if (instance? Throwable (last args)) [(butlast args) (last args)] [args nil])]
-    (merge 
-                     (make-message (apply (partial format pattern) args) level pattern)
-                     (ex-log ex))
+        (if (instance? Throwable (last args)) [(butlast args) (last args)] [args nil])]    
     (log-message
       ns
       level
@@ -77,30 +74,34 @@
         (make-message ns (apply (partial format pattern) args) level pattern)
         (ex-log ex)))))
 
-(defn logf [level pattern & args]
-  `(logf *ns* ~level ~pattern ~args))
+(defmacro logf
+  "level can be :trace, :debug, :info, :warn, :error, :fatal
+   pattern - string
+   args - parameters which will be passed to the pattern to be filled in, can optionally end with a Throwable"
+  [level pattern & args]
+  `(gen-logf *ns* ~level ~pattern ~@args))
 
 (defn read-log
   "accepts file name as input, a filter function which each item in the log will be checked against and maximum number of logs to retain"
   ([file-name] (read-log file-name nil nil))
   ([file-name param] (apply (partial read-log file-name) (if (number? param) [nil param] [param nil])))
   ([file-name log-filter max-size]
-  (when (not (.exists (new java.io.File file-name)))
-    (throw (new Exception (str "log " file-name " is not available!"))))
-  (with-open [r (->> file-name
-                  (new FileInputStream)
-                  (new InputStreamReader)
-                  (new PushbackReader))]
-    (binding [*read-eval* false]
-      (loop [logs '()]
-        (let [item (try (read r nil nil) (catch Exception ex {:parse-error (.getMessage ex)}))] 
-          (if item
-            ;;if log reached max size, then drop items before adding new items
-            ;;return tail end of the log up to max size
-            (recur (if (or (nil? log-filter ) (log-filter item))
-                     (conj 
-                       (if (or (nil? max-size) (< (count logs) max-size))
-                         logs (butlast logs)) item) 
-                     logs))
-            logs)))))))
+    (when (not (.exists (new java.io.File file-name)))
+      (throw (new Exception (str "log " file-name " is not available!"))))
+    (with-open [r (->> file-name
+                    (new FileInputStream)
+                    (new InputStreamReader)
+                    (new PushbackReader))]
+      (binding [*read-eval* false]
+        (loop [logs '()]
+          (let [item (try (read r nil nil) (catch Exception ex {:parse-error (.getMessage ex)}))] 
+            (if item
+              ;;if log reached max size, then drop items before adding new items
+              ;;return tail end of the log up to max size
+              (recur (if (or (nil? log-filter ) (log-filter item))
+                       (conj 
+                         (if (or (nil? max-size) (< (count logs) max-size))
+                           logs (butlast logs)) item) 
+                       logs))
+              logs)))))))
 
