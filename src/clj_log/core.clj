@@ -22,25 +22,20 @@
       :localized (.getLocalizedMessage ex)
       :stack-trace (stack-trace ex)}}))
 
-(defn- make-message [ns message level & [pattern]]
-  (let [msg {:ns (name (ns-name ns))
+(defn- make-message [message level & [pattern]]
+  (let [msg {:ns (name (ns-name *ns*))
              :time (new Date)
              :message message
              :level level}]
     (if pattern (assoc msg :pattern pattern) msg)))
 
-(defn- log-message [ns level message]
-  (logging/log ns level nil 
+(defn- log-message [level message]
+  (logging/log *ns* level nil 
                (let [wrt (new java.io.StringWriter)]
                  (clojure.pprint/pprint message wrt)
                  (.toString wrt))))
 
-(defn gen-log [ns level message ex]
-  (let [message-info   (make-message ns message level)         
-         exception-info (ex-log ex)]
-    (log-message ns level (merge message-info exception-info))))
-
-(defmacro log
+(defn log 
   "level can be :trace, :debug, :info, :warn, :error, :fatal
    message - string
    ex - Throwable
@@ -60,26 +55,24 @@
                      :file file name
                      :line number
                      :method}}"
-  [level message & [more]]  
-  `(gen-log *ns* ~level ~message ~more))
+  [level message & [ex]]
+  (let [message-info   (make-message message level)         
+         exception-info (ex-log ex)]
+    (log-message level (merge message-info exception-info))))
 
 
-(defn gen-logf [ns level pattern & args]
-  (let [[format-args ex] 
-        (if (instance? Throwable (last args)) [(butlast args) (last args)] [args nil])]    
-    (log-message
-      ns
-      level
-      (merge 
-        (make-message ns (apply (partial format pattern) args) level pattern)
-        (ex-log ex)))))
-
-(defmacro logf
+(defn logf [level pattern & args]
   "level can be :trace, :debug, :info, :warn, :error, :fatal
    pattern - string
    args - parameters which will be passed to the pattern to be filled in, can optionally end with a Throwable"
-  [level pattern & args]
-  `(gen-logf *ns* ~level ~pattern ~@args))
+  (let [[format-args ex] 
+        (if (instance? Throwable (last args)) [(butlast args) (last args)] [args nil])]    
+    (log-message      
+      level
+      (merge 
+        (make-message (apply (partial format pattern) args) level pattern)
+        (ex-log ex)))))
+
 
 (defn read-log
   "accepts file name as input, a filter function which each item in the log will be checked against and maximum number of logs to retain"
