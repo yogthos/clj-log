@@ -44,4 +44,3 @@
   (= 1 (count (read-log log-file #(= :error (:level %)))))
   (= ["last item" "baz"] (map :message (read-log log-file 2)))
   (= ["error" "foo" "last item"] (map :message (read-log log-file #(not= "baz" (:message %)) 3))))
-
