@@ -18,7 +18,7 @@
     {:exception
      {:class (class ex)
       :cause (ex-log (.getCause ex))
-      :message (.getMessage ex)
+      :message (if (instance? clojure.lang.ExceptionInfo ex) (.getData ex) (.getMessage ex))
       :localized (.getLocalizedMessage ex)
       :stack-trace (stack-trace ex)}}))
 
