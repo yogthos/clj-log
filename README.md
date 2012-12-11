@@ -45,7 +45,7 @@ Accepted logging levels are:
 
 ;output
 
-{:ns "clj-log.test.core",
+{:ns "example",
  :time #inst "2012-06-14T21:46:12.980-00:00",
  :message "foo",
  :level :info}
@@ -56,7 +56,7 @@ Accepted logging levels are:
  
  ;output 
  
- {:ns "clj-log.test.core",
+ {:ns "example",
  :time #inst "2012-06-15T02:55:17.392-00:00",
  :message {:foo "bar"},
  :level :warn}
@@ -69,7 +69,7 @@ Accepted logging levels are:
 ;output
 
 {:pattern "%s accidentally the whole %s",
- :ns "clj-log.test.core",
+ :ns "example",
  :time #inst "2012-06-15T02:25:42.070-00:00",
  :message "I accidentally the whole .jar file",
  :level :info}
@@ -127,7 +127,7 @@ Accepted logging levels are:
     :file "Thread.java",
     :line 722,
     :method "run"}]},
- :ns "clj-log.test.core",
+ :ns "example",
  :time #inst "2012-06-14T21:51:56.871-00:00",
  :message "an error has occured",
  :level :error}
