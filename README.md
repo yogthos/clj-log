@@ -7,9 +7,7 @@ S-expression logger for Clojure using [clojure.tools.logging](http://clojure.git
 
 Leiningen
 
-```clojure
-[clj-log "0.4.5"]
-```
+!["Leiningen version"](https://clojars.org/clj-log/latest-version.svg)
 
 ## Usage
 
