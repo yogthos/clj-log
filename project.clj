@@ -1,4 +1,4 @@
-(defproject clj-log "0.4.7"
+(defproject clj-log "0.4.6"
   :description "structured logger"
   :url "https://github.com/yogthos/clj-log"  
   :license {:name "Eclipse Public License"
