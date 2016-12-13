@@ -22,25 +22,26 @@
       :localized (.getLocalizedMessage ex)
       :stack-trace (stack-trace ex)}}))
 
-(defn- make-message [message level & [pattern]]
-  (let [msg {:ns (name (ns-name *ns*))
+(defn- make-message [logger-ns message level & [pattern]]
+  (let [msg {:ns (name (ns-name logger-ns))
              :time (new Date)
              :message message
              :level level}]
     (if pattern (assoc msg :pattern pattern) msg)))
 
-(defn- log-message [level message]
-  (logging/log *ns* level nil 
+(defn- log-message
+  [logger-ns level message]
+  (logging/log logger-ns level nil
                (let [wrt (new java.io.StringWriter)]
                  (clojure.pprint/pprint message wrt)
                  (.toString wrt))))
 
-(defn log 
+(defmacro log
   "level can be :trace, :debug, :info, :warn, :error, :fatal
    message - string
    ex - Throwable
-  
-   logs the message in format 
+
+   logs the message in format
    {:ns namespace
     :time log-time
     :message message
@@ -56,23 +57,22 @@
                      :line number
                      :method}}"
   [level message & [ex]]
-  (let [message-info   (make-message message level)         
-         exception-info (ex-log ex)]
-    (log-message level (merge message-info exception-info))))
+  `(let [message-info#    (~make-message ~*ns* ~message ~level)
+         exception-info#  (~ex-log ~ex)]
+    (~log-message ~*ns* ~level (merge message-info# exception-info#))))
 
-
-(defn logf [level pattern & args]
+(defmacro logf
   "level can be :trace, :debug, :info, :warn, :error, :fatal
    pattern - string
    args - parameters which will be passed to the pattern to be filled in, can optionally end with a Throwable"
-  (let [[format-args ex] 
-        (if (instance? Throwable (last args)) [(butlast args) (last args)] [args nil])]    
-    (log-message      
-      level
-      (merge 
-        (make-message (apply (partial format pattern) args) level pattern)
-        (ex-log ex)))))
-
+  [level pattern & args]
+  `(let [args# (list ~@args)
+        [format-args# ex#] (if (instance? Throwable (last args#))
+                                 [(butlast args#) (last args#)]
+                                 [args# nil])
+         message-info# (~make-message ~*ns* (apply (partial format ~pattern) args#) ~level ~pattern)
+         exception-info# (~ex-log ex#)]
+    (~log-message ~*ns* ~level (merge message-info# exception-info#))))
 
 (defn read-log
   "accepts file name as input, a filter function which each item in the log will be checked against and maximum number of logs to retain"
@@ -87,14 +87,13 @@
                     (new PushbackReader))]
       (binding [*read-eval* false]
         (loop [logs '()]
-          (let [item (try (read r nil nil) (catch Exception ex {:parse-error (.getMessage ex)}))] 
+          (let [item (try (read r nil nil) (catch Exception ex {:parse-error (.getMessage ex)}))]
             (if item
               ;;if log reached max size, then drop items before adding new items
               ;;return tail end of the log up to max size
               (recur (if (or (nil? log-filter ) (log-filter item))
-                       (conj 
+                       (conj
                          (if (or (nil? max-size) (< (count logs) max-size))
-                           logs (butlast logs)) item) 
+                           logs (butlast logs)) item)
                        logs))
               logs)))))))
-
